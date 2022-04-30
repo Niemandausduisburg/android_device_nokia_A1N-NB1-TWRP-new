@@ -15,8 +15,8 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/twrp_NB1.mk
+    $(LOCAL_DIR)/twrp_A1N.mk
 
 COMMON_LUNCH_CHOICES := \
-    twrp_NB1-eng \
-    twrp_NB1-userdebug
+    twrp_A1N-eng \
+    twrp_A1N-userdebug
