@@ -83,7 +83,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 ## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := NB1
-PRODUCT_NAME := twrp_NB1
+PRODUCT_NAME := SHRP_NB1
 PRODUCT_BRAND := Nokia
 PRODUCT_MODEL := Nokia 8
 PRODUCT_MANUFACTURER := HMD Global
@@ -92,3 +92,6 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     PRIVATE_BUILD_DESC="NB1_00WW_FIH-user 9 PPR1.180610.011 00WW_5_16A release-keys"
 
 BUILD_FINGERPRINT := Nokia/NB1_00WW_FIH/NB1:9/PPR1.180610.011/00WW_5_16A:user/release-keys
+
+# Inherit SHRP build flags
+$(call inherit-product, device/nokia/NB1/SHRP.mk)
