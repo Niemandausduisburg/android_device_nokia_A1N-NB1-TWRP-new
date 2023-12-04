@@ -26,16 +26,10 @@
 #
 
 import /init.recovery.qcom_decrypt.rc
-
-on early-init
-    mkdir /firmware 0771 system system
-
-on init
-    setprop prepdecrypt.loglevel 2
-
-on boot
-    setprop sys.usb.config mtp,adb
-
+    
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
+	
+on post-fs
+    start boot-hal-1-0

@@ -1,0 +1,172 @@
+#
+# Copyright (C) 2023 Team Win Recovery Project
+#
+# Common board config for Nokia MSM8998 devices
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+COMMON_PATH := device/nokia/msm8998-common
+
+# Build hax
+ALLOW_MISSING_DEPENDENCIES := true
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+
+# Architecture
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_ABI2 :=
+TARGET_CPU_VARIANT := generic
+TARGET_CPU_VARIANT_RUNTIME := cortex-a73
+
+TARGET_2ND_ARCH := arm
+TARGET_2ND_ARCH_VARIANT := armv8-a
+TARGET_2ND_CPU_ABI := armeabi-v7a
+TARGET_2ND_CPU_ABI2 := armeabi
+TARGET_2ND_CPU_VARIANT := generic
+TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a73
+
+# A/B
+AB_OTA_UPDATER := true
+
+AB_OTA_PARTITIONS += \
+    boot \
+    system \
+    vendor
+
+ifeq ($(PRODUCT_USE_DYNAMIC_PARTITIONS), false)
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := true
+endif
+BOARD_USES_RECOVERY_AS_BOOT := true
+TARGET_NO_KERNEL := false
+TARGET_NO_RECOVERY := false
+
+# Bootloader
+TARGET_BOOTLOADER_BOARD_NAME := msm8998
+TARGET_NO_BOOTLOADER := true
+TARGET_USES_UEFI := true
+
+# Crypto
+TW_INCLUDE_CRYPTO := true
+BOARD_USES_QCOM_FBE_DECRYPTION := true
+TW_USE_FSCRYPT_POLICY := 1
+TW_INCLUDE_RESETPROP := true
+PLATFORM_SECURITY_PATCH := 2127-12-31
+VENDOR_SECURITY_PATCH := 2127-12-31
+PLATFORM_VERSION := 127
+PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
+
+# Enforce vintf manifest.
+PRODUCT_ENFORCE_VINTF_MANIFEST := true
+
+# Kernel
+BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37
+BOARD_KERNEL_CMDLINE += ehci-hcd.park=3 sched_enable_hmp=0 sched_enable_power_aware=1
+BOARD_KERNEL_CMDLINE += service_locator.enable=1 swiotlb=2048 androidboot.configfs=true
+BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=a800000.dwc3 loop.max_part=7
+ifeq ($(PRODUCT_USE_DYNAMIC_PARTITIONS),true)
+BOARD_KERNEL_CMDLINE += androidboot.boot_devices=soc/1da4000.ufshc
+endif
+BOARD_KERNEL_BASE := 0x00000000
+BOARD_KERNEL_PAGESIZE := 4096
+BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
+
+## Prebuilt kernel
+ifeq ($(TARGET_USES_PREBUILT_KERNEL), false)
+TARGET_KERNEL_CLANG_COMPILE := true
+TARGET_KERNEL_VERSION := 4.4
+TARGET_KERNEL_CONFIG := lineageos_$(TARGET_DEVICE)_defconfig
+TARGET_KERNEL_SOURCE := kernel/nokia/msm8998
+
+TARGET_KERNEL_ADDITIONAL_FLAGS := \
+    HOSTCFLAGS="-fuse-ld=lld -Wno-unused-command-line-argument"
+else
+TARGET_FORCE_PREBUILT_KERNEL := $(COMMON_PATH)/prebuilts/$(TARGET_DEVICE)/Image.gz-dtb
+PRODUCT_COPY_FILES += \
+	$(TARGET_FORCE_PREBUILT_KERNEL):kernel
+endif
+
+# Partitions
+BOARD_USES_METADATA_PARTITION := true
+BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
+BOARD_FLASH_BLOCK_SIZE := 262144	# (BOARD_KERNEL_PAGESIZE * 64)
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+TARGET_USES_MKE2FS := true
+
+ifeq ($(PRODUCT_USE_DYNAMIC_PARTITIONS), true)
+BOARD_SUPER_PARTITION_BLOCK_DEVICES := system vendor
+BOARD_SUPER_PARTITION_METADATA_DEVICE := system
+BOARD_SUPER_PARTITION_SYSTEM_DEVICE_SIZE := 3579607296
+BOARD_SUPER_PARTITION_VENDOR_DEVICE_SIZE := 1073741824
+BOARD_SUPER_PARTITION_SIZE := $(shell expr $(BOARD_SUPER_PARTITION_VENDOR_DEVICE_SIZE) + $(BOARD_SUPER_PARTITION_SYSTEM_DEVICE_SIZE))
+
+BOARD_SUPER_PARTITION_GROUPS := nokia_msm8998_dynamic
+BOARD_NOKIA_MSM8998_DYNAMIC_SIZE := $(shell expr $(BOARD_SUPER_PARTITION_SIZE) - 4194304 )
+BOARD_NOKIA_MSM8998_DYNAMIC_PARTITION_LIST := system vendor
+else
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 3579607296
+BOARD_VENDORIMAGE_PARTITION_SIZE := 1073741824
+endif
+
+## Workaround for error copying vendor files to recovery ramdisk
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+TARGET_COPY_OUT_VENDOR := vendor
+
+# Platforms
+TARGET_SUPPORTS_64_BIT_APPS := true
+TARGET_BOARD_PLATFORM_GPU := qcom-adreno540
+
+# Recovery
+BOARD_HAS_LARGE_FILESYSTEM := true
+BOARD_HAS_NO_SELECT_BUTTON := true
+TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+
+TARGET_RECOVERY_DEVICE_MODULES += \
+    libion \
+    libxml2 \
+    vendor.display.config@1.0 \
+    vendor.display.config@2.0 \
+    tzdata
+
+RECOVERY_LIBRARY_SOURCE_FILES += \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libion.so \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libxml2.so \
+    $(TARGET_OUT_SYSTEM_EXT_SHARED_LIBRARIES)/vendor.display.config@1.0.so \
+    $(TARGET_OUT_SYSTEM_EXT_SHARED_LIBRARIES)/vendor.display.config@2.0.so
+
+# Recovery fstab
+ifeq ($(PRODUCT_USE_DYNAMIC_PARTITIONS), true)
+TARGET_RECOVERY_FSTAB := $(COMMON_PATH)/recovery/fstab/recovery-dyn.fstab
+PRODUCT_COPY_FILES += $(COMMON_PATH)/recovery/fstab/twrp-dyn.flags:$(TARGET_COPY_OUT_RECOVERY)/root/system/etc/twrp.flags
+else
+TARGET_RECOVERY_FSTAB := $(COMMON_PATH)/recovery/fstab/recovery-nondyn.fstab
+PRODUCT_COPY_FILES += $(COMMON_PATH)/recovery/fstab/twrp-nondyn.flags:$(TARGET_COPY_OUT_RECOVERY)/root/system/etc/twrp.flags
+endif
+
+# VNDK
+BOARD_VNDK_VERSION := current
+
+# TWRP specific build flags
+BOARD_HAS_NO_REAL_SDCARD := true
+RECOVERY_SDCARD_ON_DATA := true
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
+TW_DEFAULT_BRIGHTNESS := "30"
+TW_EXCLUDE_DEFAULT_USB_INIT := true
+TW_EXCLUDE_SUPERSU := true
+TW_EXTRA_LANGUAGES := true
+TW_INCLUDE_NTFS_3G := true
+TW_INPUT_BLACKLIST := "hbtp_vm"
+TW_THEME := portrait_hdpi
+TW_USE_TOOLBOX := true
+
+# TWRP extra flags
+BOARD_SUPPRESS_SECURE_ERASE := true
+TW_EXCLUDE_TWRPAPP := true
+TWRP_INCLUDE_LOGCAT:= true
+TARGET_USES_LOGD := true
