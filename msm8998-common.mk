@@ -55,8 +55,13 @@ PRODUCT_PACKAGES_DEBUG += \
 
 # Debug
 PRODUCT_PACKAGES += \
-	crash_dump \
-	libprocinfo.recovery
+    crash_dump \
+    libprocinfo.recovery
+
+# Health
+PRODUCT_PACKAGES += \
+    android.hardware.health@2.0-impl-qti \
+    android.hardware.health@2.0-service
 
 ifeq ($(DYNAMIC), true)
 # Set these flag to true to build for Retrofit Dynamic Partition devices.
@@ -67,7 +72,7 @@ endif
 ifeq ($(PRODUCT_USE_DYNAMIC_PARTITIONS), true)
 # fastbootd
 PRODUCT_PACKAGES += \
-	fastbootd
+    fastbootd
 endif
 
 # Product platform
@@ -75,12 +80,12 @@ PRODUCT_PLATFORM := msm8998
 
 # qcom standard decryption
 PRODUCT_PACKAGES += \
-	qcom_decrypt \
-	qcom_decrypt_fbe
+    qcom_decrypt \
+    qcom_decrypt_fbe
 
 PRODUCT_PROPERTY_OVERRIDES += \
-	ro.hardware.keystore=msm8998 \
-	ro.hardware.gatekeeper=msm8998
+    ro.hardware.keystore=msm8998 \
+    ro.hardware.gatekeeper=msm8998
 
 # tzdata
 PRODUCT_PACKAGES += \
