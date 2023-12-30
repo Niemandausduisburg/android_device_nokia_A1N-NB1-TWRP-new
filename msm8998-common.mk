@@ -58,9 +58,11 @@ PRODUCT_PACKAGES += \
 	crash_dump \
 	libprocinfo.recovery
 
+ifeq ($(DYNAMIC), true)
 # Set these flag to true to build for Retrofit Dynamic Partition devices.
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 PRODUCT_RETROFIT_DYNAMIC_PARTITIONS := true
+endif
 
 ifeq ($(PRODUCT_USE_DYNAMIC_PARTITIONS), true)
 # fastbootd
